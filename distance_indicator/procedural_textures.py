@@ -11,8 +11,8 @@ from ursina import Texture
 
 
 def create_speed_lines_image(
-    line_color: tuple = (12, 14, 18, 240),
-    num_lines: int = 180,
+    line_color: tuple = (6, 8, 12, 255),
+    num_lines: int = 220,
     size: int = 1024,
     inner_radius_ratio: float = 0.28,
     seed: int = 42,
@@ -27,13 +27,13 @@ def create_speed_lines_image(
     for i in range(num_lines):
         angle = (i / float(num_lines)) * 2.0 * math.pi + rng.uniform(-0.02, 0.02)
         inner_r = size * (inner_radius_ratio + rng.uniform(-0.06, 0.08))
-        outer_r = size * 0.95
+        outer_r = size * 0.98
 
         x1 = center + inner_r * math.cos(angle)
         y1 = center + inner_r * math.sin(angle)
 
         perp = angle + math.pi / 2.0
-        width = rng.uniform(2.5, 8.5)
+        width = rng.uniform(3.5, 11.5)
 
         x2_base = center + outer_r * math.cos(angle)
         y2_base = center + outer_r * math.sin(angle)
@@ -42,7 +42,7 @@ def create_speed_lines_image(
         p2 = (x2_base + math.cos(perp) * width, y2_base + math.sin(perp) * width)
         p3 = (x2_base - math.cos(perp) * width, y2_base - math.sin(perp) * width)
 
-        alpha = int(line_color[3] * rng.uniform(0.7, 1.0))
+        alpha = int(line_color[3] * rng.uniform(0.75, 1.0))
         color = (line_color[0], line_color[1], line_color[2], alpha)
         draw.polygon([p1, p2, p3], fill=color)
 
@@ -52,20 +52,20 @@ def create_speed_lines_image(
 def generate_in_memory_textures() -> dict:
     """Creates in-memory Ursina Textures for all visual presets (~100-150ms)."""
     img_black = create_speed_lines_image(
-        line_color=(12, 14, 18, 240),
-        num_lines=210,
+        line_color=(6, 8, 12, 255),
+        num_lines=230,
         inner_radius_ratio=0.26,
         seed=101,
     )
     img_white = create_speed_lines_image(
-        line_color=(255, 255, 255, 220),
-        num_lines=180,
+        line_color=(255, 255, 255, 235),
+        num_lines=200,
         inner_radius_ratio=0.28,
         seed=202,
     )
     img_dense = create_speed_lines_image(
-        line_color=(15, 10, 20, 250),
-        num_lines=280,
+        line_color=(8, 10, 16, 255),
+        num_lines=300,
         inner_radius_ratio=0.20,
         seed=303,
     )

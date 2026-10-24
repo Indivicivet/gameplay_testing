@@ -48,10 +48,6 @@ void main() {
     float vig = smoothstep(0.4, 0.95, dist);
     col = mix(col, col * (1.0 - vignette_intensity * 0.8), vig);
 
-    // 4. Boundary Flash / Edge Pulse (White glow around periphery on threshold crossing)
-    float flash_edge = smoothstep(0.35, 0.9, dist) * flash_intensity;
-    col = mix(col, vec3(1.0, 0.95, 0.9), clamp(flash_edge, 0.0, 0.85));
-
     fragColor = vec4(col, 1.0);
 }
 """,

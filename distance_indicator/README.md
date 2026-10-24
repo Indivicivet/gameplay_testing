@@ -41,14 +41,20 @@ Press keys `1` through `5` at runtime to test different visual styles:
 5. **Full Hybrid (`Key 5`, Default)**:
    - Harmonized combination of action lines, radial zoom blur, chromatic aberration, peripheral vignette, and dynamic FoV.
 
-### 3. Dynamic Field of View (`ZOOM_CONST`)
-Camera FoV scales dynamically:
-$$\text{FOV} = \text{BASE\_FOV} + \text{ZOOM\_CONST} \cdot f(d) + \text{Pulse}$$
-* Controllable in real-time with `[` (decrease) and `]` (increase).
+### 3. Light Field of View Modulation (`ZOOM_CONST`)
+Camera FoV modulates smoothly as you transition between regions:
+$$\text{FOV} = \text{BASE\_FOV} + \text{ZOOM\_CONST} \cdot f(d) + \text{Transition Kick} + \text{Breathing}$$
+* **Stepped Widening**: FoV comfortably expands from 62.0° (safe range) to 72.0° (clinch zone), enhancing speed perception and spatial awareness.
+* **Transition Kick**: +2.2° dynamic optical kick upon crossing each distance boundary into a closer tier.
+* **Clinch Breathing**: Subtle ±0.5° breathing cycle when inside the close infighting clinch zone ($d \le 1.0\text{m}$).
+* **Live In-Game FoV Tuning**: Press `[` to decrease or `]` to increase `ZOOM_CONST` (range $-25.0^\circ$ to $+35.0^\circ$). Positive values zoom out as distance decreases; negative values zoom in.
 
-### 4. Interactive Testing HUD & Diagnostics
+### 4. High-Contrast Environment & HUD Diagnostics
+* **Light Sparring Arena**: Clean, bright floor mat and neutral sky with dark slate pillars, ensuring inky manga speed lines and ground markers pop with maximum visual contrast.
+* **Ground Rings**: Concentric colored floor rings centered beneath the opponent at **2.5m** (Azure Blue Alert), **2.0m** (Amber Gold Threat), **1.5m** (Vivid Orange Danger), and **1.0m** (Crimson Red Clinch).
+* **High-Contrast HUD Cards**: Semi-transparent dark backing cards behind the top Distance banner, bottom-left status readout, and bottom-right controls panel ensure 100% legibility under any lighting or camera angle.
+* **Layer Depth Ordering**: Speed lines render behind the HUD, so diagnostic readouts and controls remain crisp and unobstructed.
 * **Live Curve Graph**: Renders the Image 1 response curve in the top-right corner with a real-time tracking dot showing current distance $d$ and intensity $f(d)$.
-* **Ground Rings**: Concentric colored floor rings around the opponent at $1.0\text{m}$, $1.2\text{m}$, $1.4\text{m}$, and $1.6\text{m}$ so you can verify physical position against screen effects.
 * **Camera Modes**: Toggle with `C` between 3rd-person follow, over-the-shoulder, and 1st-person.
 * **Opponent AI**: Toggle with `M` between milling around slowly, standing still (for precise measurement), or following.
 

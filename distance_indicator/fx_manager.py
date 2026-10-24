@@ -4,7 +4,8 @@ Manages dynamic camera FOV, post-processing shader uniforms, speed lines overlay
 and presets.
 """
 
-from ursina import Entity, camera, Vec2, color, Texture
+import math
+from ursina import Entity, camera, Vec2, color, Texture, time
 import shaders
 from config import CONFIG
 from procedural_textures import generate_in_memory_textures
@@ -49,7 +50,7 @@ class FXManager:
             model="quad",
             scale=(2.3, 2.3),
             color=color.rgba(1, 1, 1, 0),
-            z=-1,  # Behind HUD text, in front of 3D scene
+            z=0.5,  # Behind HUD text (z <= 0), in front of 3D scene
         )
 
         self.texture_black = textures["black"]
@@ -72,9 +73,14 @@ class FXManager:
         center_uv: Vec2 = Vec2(0.5, 0.5),
     ):
         """Updates all visual effects based on distance response curve."""
-        # 1. FOV Zoom Calculation (controllable via ZOOM_CONST)
-        # Zooms out smoothly as opponent gets closer
-        target_fov = self.base_fov + (self.zoom_const * steady_fx)
+        # 1. Light Field of View Modulation across distance zones
+        # - Stepped widening linked to the bumpy transfer function f(d)
+        # - Clean +2.2 deg optical kick when stepping into a closer tier
+        # - Subtle 0.5 deg breathing cycle when in the infighting clinch zone
+        step_zoom = self.zoom_const * steady_fx
+        transition_kick = cross_pulse * 2.2
+        breathing = 0.5 * math.sin(time.time() * 3.5) if zone == 4 else 0.0
+        target_fov = self.base_fov + step_zoom + transition_kick + breathing
         self.fov_smooth += (target_fov - self.fov_smooth) * min(1.0, dt * 14.0)
         camera.fov = self.fov_smooth
 

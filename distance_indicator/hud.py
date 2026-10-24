@@ -88,24 +88,34 @@ class HUD(Entity):
     """Manages all screen-space text, diagnostic graphs, and status readouts."""
 
     def __init__(self, curve_texture: Texture = None):
-        super().__init__(parent=camera.ui)
+        super().__init__(parent=camera.ui, z=-0.2)
 
-        # Distance & Zone Readout Banner (Top Center)
+        # Distance & Zone Readout Banner (Top Center with sleek high-contrast backing card)
+        self.banner_bg = Entity(
+            parent=self,
+            model="quad",
+            scale=(0.64, 0.15),
+            position=(0, 0.42),
+            color=color.rgba(12 / 255, 16 / 255, 24 / 255, 0.88),
+            z=0.02,
+        )
         self.dist_text = Text(
             parent=self,
             text="Distance: -- m",
-            position=(0, 0.45),
+            position=(0, 0.455),
             origin=(0, 0),
-            scale=1.6,
+            scale=1.5,
             color=color.white,
+            z=-0.05,
         )
         self.zone_text = Text(
             parent=self,
             text="Zone: Safe Range",
-            position=(0, 0.40),
+            position=(0, 0.385),
             origin=(0, 0),
-            scale=1.1,
+            scale=0.95,
             color=color.rgb(160 / 255, 200 / 255, 255 / 255),
+            z=-0.05,
         )
 
         # Graph Panel (Top Right)
@@ -119,6 +129,7 @@ class HUD(Entity):
             scale=(0.42, 0.21),
             position=(0.65, 0.35),
             color=color.white,
+            z=0.0,
         )
 
         # Animated cursor on the curve graph
@@ -130,17 +141,34 @@ class HUD(Entity):
             z=-0.1,
         )
 
-        # Status & Controls Panel (Bottom Left)
+        # Status & Controls Panel (Bottom Left with high-contrast backing card)
+        self.info_bg = Entity(
+            parent=self,
+            model="quad",
+            scale=(0.56, 0.18),
+            position=(-0.59, -0.37),
+            color=color.rgba(12 / 255, 16 / 255, 24 / 255, 0.88),
+            z=0.02,
+        )
         self.info_text = Text(
             parent=self,
             text="",
-            position=(-0.85, -0.28),
+            position=(-0.84, -0.44),
             origin=(-0.5, -0.5),
             scale=0.9,
             color=color.rgb(220 / 255, 230 / 255, 245 / 255),
+            z=-0.05,
         )
 
-        # Help overlay (Bottom Right)
+        # Help overlay (Bottom Right with high-contrast backing card)
+        self.help_bg = Entity(
+            parent=self,
+            model="quad",
+            scale=(0.48, 0.30),
+            position=(0.64, -0.33),
+            color=color.rgba(12 / 255, 16 / 255, 24 / 255, 0.88),
+            z=0.02,
+        )
         self.help_text = Text(
             parent=self,
             text=(
@@ -151,13 +179,14 @@ class HUD(Entity):
                 "  [1-5] Switch FX Preset\n"
                 "  [M] Opponent AI (Milling/Idle/Follow)\n"
                 "  [C] Camera View (3rd/Shoulder/1st)\n"
-                "  [ [ / ] ] Adjust ZOOM_CONST\n"
+                "  [ [ / ] ] Adjust ZOOM_CONST (FoV Mod)\n"
                 "  [R] Reset Positions"
             ),
-            position=(0.85, -0.48),
+            position=(0.85, -0.46),
             origin=(0.5, -0.5),
             scale=0.75,
-            color=color.rgb(180 / 255, 195 / 255, 215 / 255),
+            color=color.rgb(195 / 255, 210 / 255, 230 / 255),
+            z=-0.05,
         )
 
     def update_hud(
@@ -169,6 +198,7 @@ class HUD(Entity):
         zoom_const: float,
         opponent_state: str,
         cam_mode: str,
+        current_fov: float = 62.0,
     ):
         """Updates text readouts and graph cursor position."""
         # 1. Distance & Zone text
@@ -216,7 +246,7 @@ class HUD(Entity):
         preset_label = PRESET_NAMES.get(preset_id, "Unknown")
         self.info_text.text = (
             f"Active FX Preset:  {preset_label}\n"
-            f"ZOOM_CONST (FOV):  {zoom_const:+.1f} deg\n"
+            f"Field of View:     {current_fov:4.1f}° (Mod: {zoom_const:+.1f}°)\n"
             f"Opponent Mode:     {opponent_state}\n"
             f"Camera Mode:       {cam_mode}"
         )

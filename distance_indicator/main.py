@@ -37,10 +37,10 @@ class DistanceIndicatorGame(Entity):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        # Lighting & environment
-        Sky(color=color.rgb(24 / 255, 28 / 255, 38 / 255))
-        DirectionalLight(y=6, z=-3, x=4, rotation=(45, -30, 0), shadows=False)
-        AmbientLight(color=color.rgba(140 / 255, 150 / 255, 170 / 255, 1.0))
+        # Lighting & environment (clean light high-contrast aesthetic)
+        Sky(color=color.rgb(0.85, 0.88, 0.92))
+        DirectionalLight(y=8, z=-5, x=5, rotation=(50, -35, 0), shadows=False)
+        AmbientLight(color=color.rgba(0.68, 0.70, 0.74, 1.0))
 
         # 3D Scene Entities
         self.arena = Arena(CONFIG.thresholds)
@@ -160,11 +160,11 @@ class DistanceIndicatorGame(Entity):
             self.cam_mode_idx = (self.cam_mode_idx + 1) % len(self.cam_modes)
             self.update_camera(0.016)
 
-        # Adjust ZOOM_CONST
+        # Adjust ZOOM_CONST (Field of View modulation)
         elif key == "[":
-            self.fx_manager.zoom_const = max(0.0, self.fx_manager.zoom_const - 2.0)
+            self.fx_manager.zoom_const = max(-25.0, self.fx_manager.zoom_const - 2.5)
         elif key == "]":
-            self.fx_manager.zoom_const = min(40.0, self.fx_manager.zoom_const + 2.0)
+            self.fx_manager.zoom_const = min(35.0, self.fx_manager.zoom_const + 2.5)
 
         # Reset positions
         elif key == "r":
@@ -220,6 +220,7 @@ class DistanceIndicatorGame(Entity):
             zoom_const=self.fx_manager.zoom_const,
             opponent_state=self.opponent.state,
             cam_mode=self.cam_modes[self.cam_mode_idx],
+            current_fov=camera.fov,
         )
 
 
@@ -229,7 +230,7 @@ app = Ursina(
     borderless=False,
     size=(1280, 720),
 )
-window.color = color.rgb(18 / 255, 20 / 255, 26 / 255)
+window.color = color.rgb(0.80, 0.82, 0.86)
 
 game = DistanceIndicatorGame()
 

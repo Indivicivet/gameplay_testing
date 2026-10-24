@@ -13,16 +13,16 @@ class DistanceConfig:
     # Step transition sharpness (width of sigmoid transition in meters)
     step_width: float = 0.08
 
-    # FoV scaling: fov = base_fov + zoom_const * f(d)
-    base_fov: float = 60.0
-    zoom_const: float = 16.0
+    # FoV scaling: fov = base_fov + zoom_const * f(d) + kick + breathing
+    base_fov: float = 62.0
+    zoom_const: float = 10.0  # Light, comfortable FoV dilation across tiers
 
     # Movement speeds (slowed down by 30% for careful distance testing)
     player_walk_speed: float = 1.26
     opponent_speed: float = 0.63
 
-    # Screen flash disabled per user feedback
-    cross_pulse_duration: float = 0.0
+    # Light FoV transition kick duration (zero screen flash)
+    cross_pulse_duration: float = 0.28
 
     def __post_init__(self):
         if self.thresholds is None:

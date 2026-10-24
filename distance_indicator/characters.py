@@ -22,11 +22,11 @@ class Arena(Entity):
         if thresholds is None:
             thresholds = CONFIG.thresholds
 
-        # Ground plane
+        # Ground plane (clean, light sparring mat for maximum visual contrast)
         self.floor = Entity(
             model="plane",
             scale=(30, 1, 30),
-            color=color.rgb(28 / 255, 30 / 255, 36 / 255),
+            color=color.rgb(0.74, 0.77, 0.82),
             texture="white_cube",
             texture_scale=(30, 30),
             y=0,
@@ -46,16 +46,16 @@ class Arena(Entity):
                 model="cube",
                 position=(px, 1.5, pz),
                 scale=(0.4, 3, 0.4),
-                color=color.rgb(45 / 255, 50 / 255, 62 / 255),
+                color=color.rgb(0.32, 0.36, 0.44),
             )
 
         # Concentric distance rings on floor (rendered as flat circles)
         self.rings = []
         ring_colors = [
-            color.rgba(70 / 255, 140 / 255, 255 / 255, 0.45),  # 1.6m Alert (Blue)
-            color.rgba(240 / 255, 200 / 255, 50 / 255, 0.55),  # 1.4m Threat (Yellow)
-            color.rgba(255 / 255, 120 / 255, 30 / 255, 0.65),  # 1.2m Danger (Orange)
-            color.rgba(255 / 255, 45 / 255, 55 / 255, 0.80),  # 1.0m Clinch (Crimson)
+            color.rgba(0.12, 0.50, 0.95, 0.65),  # 2.5m Alert (Azure Blue)
+            color.rgba(0.92, 0.70, 0.10, 0.72),  # 2.0m Threat (Amber Gold)
+            color.rgba(0.98, 0.40, 0.08, 0.80),  # 1.5m Danger (Vivid Orange)
+            color.rgba(0.95, 0.12, 0.16, 0.88),  # 1.0m Clinch (Crimson Red)
         ]
 
         # Draw rings from largest (1.6m) to smallest (1.0m)
