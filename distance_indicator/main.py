@@ -44,7 +44,7 @@ class DistanceIndicatorGame(Entity):
 
         # 3D Scene Entities
         self.arena = Arena(CONFIG.thresholds)
-        self.player = Player(position=(0, 0, -2.5))
+        self.player = Player(position=(0, 0, -3.5))
         self.opponent = Opponent(position=(0, 0, 0))
 
         # Standard FPS/TPS Camera Boom Rig (clean spherical orbit with zero roll/jitter)
@@ -74,7 +74,7 @@ class DistanceIndicatorGame(Entity):
 
     def reset_positions(self):
         """Resets player and opponent to default testing positions."""
-        self.player.position = Vec3(0, 0, -2.5)
+        self.player.position = Vec3(0, 0, -3.5)
         self.player.rotation_y = 0
         self.opponent.position = Vec3(0, 0, 0)
         self.opponent.rotation_y = 180

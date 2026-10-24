@@ -58,15 +58,6 @@ class FXManager:
 
         self.lines_overlay.texture = self.texture_black
 
-        # Border flash overlay for extra punchy tactile threshold feedback
-        self.flash_overlay = Entity(
-            parent=camera.ui,
-            model="quad",
-            scale=(camera.aspect_ratio * 1.1, 1.1),
-            color=color.rgba(1, 1, 1, 0),
-            z=-0.5,
-        )
-
     def set_preset(self, preset_id: int):
         """Switches active visual feedback preset."""
         if preset_id in PRESET_NAMES:
@@ -80,23 +71,22 @@ class FXManager:
         dt: float,
         center_uv: Vec2 = Vec2(0.5, 0.5),
     ):
-        """Updates all visual effects based on distance response curve and crossing pulse."""
+        """Updates all visual effects based on distance response curve."""
         # 1. FOV Zoom Calculation (controllable via ZOOM_CONST)
-        # Zooms out as opponent gets closer (action camera wide-lens distortion)
-        target_fov = self.base_fov + (self.zoom_const * steady_fx) + (cross_pulse * 3.5)
+        # Zooms out smoothly as opponent gets closer
+        target_fov = self.base_fov + (self.zoom_const * steady_fx)
         self.fov_smooth += (target_fov - self.fov_smooth) * min(1.0, dt * 14.0)
         camera.fov = self.fov_smooth
 
-        # 2. Preset-specific visual parameter balancing
+        # 2. Preset-specific visual parameter balancing (smooth transitions, zero screen flash)
         blur = 0.0
         chroma = 0.0
         vignette = 0.0
         lines_alpha = 0.0
-        flash = cross_pulse
 
         if self.preset == FXPreset.SPRINT_BLUR:
-            blur = steady_fx * 0.95 + cross_pulse * 0.4
-            chroma = steady_fx * 0.8 + cross_pulse * 0.5
+            blur = steady_fx * 0.95
+            chroma = steady_fx * 0.8
             vignette = steady_fx * 0.35
             lines_alpha = 0.0
             self.lines_overlay.texture = self.texture_black
@@ -105,7 +95,7 @@ class FXManager:
             blur = steady_fx * 0.2
             chroma = steady_fx * 0.2
             vignette = steady_fx * 0.2
-            lines_alpha = steady_fx * 0.95 + cross_pulse * 0.25
+            lines_alpha = steady_fx * 0.95
             self.lines_overlay.texture = (
                 self.texture_dense if zone >= 3 else self.texture_black
             )
@@ -121,15 +111,14 @@ class FXManager:
             blur = steady_fx * 0.8
             chroma = steady_fx * 0.5
             vignette = 0.0
-            lines_alpha = steady_fx * 0.9 + cross_pulse * 0.2
+            lines_alpha = steady_fx * 0.9
             self.lines_overlay.texture = self.texture_white
-            flash = max(flash, steady_fx * 0.3 + cross_pulse * 0.7)
 
         elif self.preset == FXPreset.HYBRID_FULL:
-            blur = steady_fx * 0.75 + cross_pulse * 0.3
-            chroma = steady_fx * 0.65 + cross_pulse * 0.4
+            blur = steady_fx * 0.75
+            chroma = steady_fx * 0.65
             vignette = steady_fx * 0.55
-            lines_alpha = steady_fx * 0.85 + cross_pulse * 0.2
+            lines_alpha = steady_fx * 0.85
             self.lines_overlay.texture = (
                 self.texture_dense if zone >= 3 else self.texture_black
             )
@@ -138,7 +127,6 @@ class FXManager:
         camera.set_shader_input("blur_intensity", blur)
         camera.set_shader_input("chromatic_amount", chroma)
         camera.set_shader_input("vignette_intensity", vignette)
-        camera.set_shader_input("flash_intensity", flash)
         camera.set_shader_input("center", center_uv)
 
         # 4. Update speed-lines overlay
@@ -151,9 +139,3 @@ class FXManager:
             # Center aperture tightens slightly as you get deeper into danger zones
             target_scale = 2.3 * (1.0 + (1.0 - steady_fx) * 0.25)
             self.lines_overlay.scale = target_scale
-
-        # 5. Boundary flash overlay
-        if cross_pulse > 0.01:
-            self.flash_overlay.color = color.rgba(1, 1, 1, cross_pulse * 0.55)
-        else:
-            self.flash_overlay.color = color.rgba(1, 1, 1, 0)

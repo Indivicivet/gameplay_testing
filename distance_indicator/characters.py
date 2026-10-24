@@ -189,8 +189,8 @@ class Player(Mannequin):
                 angle_diff = (target_rot - self.rotation_y + 180) % 360 - 180
                 self.rotation_y += angle_diff * min(1.0, dt * 14.0)
 
-            # Procedural walking animation
-            self.walk_phase += dt * 8.0
+            # Procedural walking animation (scaled to 30% slower pace)
+            self.walk_phase += dt * 5.8
             self.left_leg.rotation_x = math.sin(self.walk_phase) * 28.0
             self.right_leg.rotation_x = -math.sin(self.walk_phase) * 28.0
             self.left_arm.rotation_x = -math.sin(self.walk_phase) * 24.0
@@ -256,7 +256,7 @@ class Opponent(Mannequin):
                 dir_vec = diff.normalized()
                 self.position += dir_vec * (self.speed * 0.7) * dt
                 self.rotation_y = math.degrees(math.atan2(dir_vec.x, dir_vec.z))
-                self.walk_phase += dt * 6.0
+                self.walk_phase += dt * 4.2
                 self.left_leg.rotation_x = math.sin(self.walk_phase) * 22.0
                 self.right_leg.rotation_x = -math.sin(self.walk_phase) * 22.0
             return
@@ -287,7 +287,7 @@ class Opponent(Mannequin):
                 1.0, dt * 5.0
             )
 
-            self.walk_phase += dt * 6.0
+            self.walk_phase += dt * 4.2
             self.left_leg.rotation_x = math.sin(self.walk_phase) * 22.0
             self.right_leg.rotation_x = -math.sin(self.walk_phase) * 22.0
         else:

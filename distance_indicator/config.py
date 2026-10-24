@@ -6,28 +6,28 @@ from typing import List
 
 @dataclass
 class DistanceConfig:
-    # 4 sensible close-combat / fighting distance thresholds (in meters)
+    # 4 fighting distance thresholds in center-to-center distance (1.0m, 1.5m, 2.0m, 2.5m)
     thresholds: List[float] = None
     threshold_names: List[str] = None
 
     # Step transition sharpness (width of sigmoid transition in meters)
-    step_width: float = 0.04
+    step_width: float = 0.08
 
     # FoV scaling: fov = base_fov + zoom_const * f(d)
     base_fov: float = 60.0
     zoom_const: float = 16.0
 
-    # Movement speeds (slow walking for precise distance testing)
-    player_walk_speed: float = 1.8
-    opponent_speed: float = 0.9
+    # Movement speeds (slowed down by 30% for careful distance testing)
+    player_walk_speed: float = 1.26
+    opponent_speed: float = 0.63
 
-    # Transient impulse settings on crossing thresholds
-    cross_pulse_duration: float = 0.35  # seconds
+    # Screen flash disabled per user feedback
+    cross_pulse_duration: float = 0.0
 
     def __post_init__(self):
         if self.thresholds is None:
-            # 4 fighting distance thresholds: 1.6m (Alert), 1.4m (Threat), 1.2m (Danger), 1.0m (Clinch)
-            self.thresholds = [1.6, 1.4, 1.2, 1.0]
+            # 4 fighting distance thresholds (center-to-center distance: 2.5m, 2.0m, 1.5m, 1.0m)
+            self.thresholds = [2.5, 2.0, 1.5, 1.0]
         if self.threshold_names is None:
             self.threshold_names = ["Alert", "Threat", "Danger", "Clinch"]
 

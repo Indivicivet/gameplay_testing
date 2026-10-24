@@ -15,14 +15,14 @@ Or double-click `run.bat`.
 ## Features
 
 ### 1. Stepped / Bumpy Response Curve $f(d)$ (Image 1)
-The distance response curve matches the hand-drawn multi-terrace curve in Image 1:
-* **Safe Range ($> 1.6\text{ m}$)**: $f(d) = 0.0$ (Zero FX, clean field of view).
-* **Zone 1: Alert ($1.4\text{ m} < d \le 1.6\text{ m}$)**: Sharp jump to the first plateau ($\approx 0.25$).
-* **Zone 2: Threat ($1.2\text{ m} < d \le 1.4\text{ m}$)**: Sharp jump to the second plateau ($\approx 0.50$).
-* **Zone 3: Danger ($1.0\text{ m} < d \le 1.2\text{ m}$)**: Sharp jump to the third plateau ($\approx 0.75$).
+The distance response curve matches the hand-drawn multi-terrace curve in Image 1 across the **1.0m – 2.5m** center-to-center fighting range:
+* **Safe Range ($> 2.5\text{ m}$)**: $f(d) = 0.0$ (Zero FX, clean field of view).
+* **Zone 1: Alert ($2.0\text{ m} < d \le 2.5\text{ m}$)**: Sharp jump to the first plateau ($\approx 0.25$).
+* **Zone 2: Threat ($1.5\text{ m} < d \le 2.0\text{ m}$)**: Sharp jump to the second plateau ($\approx 0.50$).
+* **Zone 3: Danger ($1.0\text{ m} < d \le 1.5\text{ m}$)**: Sharp jump to the third plateau ($\approx 0.75$).
 * **Zone 4: Clinch / Infighting ($d \le 1.0\text{ m}$)**: Sharp spike to maximum intensity ($1.00$).
 
-Whenever the player crosses any of these 4 key thresholds (1.6m, 1.4m, 1.2m, 1.0m), a transient boundary impact pulse triggers (screen border contraction and peripheral flash) to deliver instantaneous tactile feedback.
+Transitions are smooth yet decisive step jumps. All sudden peripheral white screen flashing has been removed for a clean visual experience. Movement speeds are slowed down (Player: 1.26 m/s, Opponent: 0.63 m/s) for deliberate distance testing.
 
 ### 2. Visual Effects & Presets (Image 2)
 Press keys `1` through `5` at runtime to test different visual styles:

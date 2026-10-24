@@ -31,8 +31,8 @@ def create_curve_texture(width: int = 512, height: int = 256) -> Texture:
     plot_w = width - margin_l - margin_r
     plot_h = height - margin_t - margin_b
 
-    d_min = 0.5
-    d_max = 2.0
+    d_min = 0.6
+    d_max = 3.0
 
     # Draw border / background grid
     draw.rectangle(
@@ -41,11 +41,11 @@ def create_curve_texture(width: int = 512, height: int = 256) -> Texture:
         width=1,
     )
 
-    # Threshold guidelines
+    # Threshold guidelines matching center-to-center distance (1.0m, 1.5m, 2.0m, 2.5m)
     threshold_colors = {
-        1.6: (80, 160, 255, 180),
-        1.4: (240, 210, 60, 180),
-        1.2: (255, 130, 40, 180),
+        2.5: (80, 160, 255, 180),
+        2.0: (240, 210, 60, 180),
+        1.5: (255, 130, 40, 180),
         1.0: (255, 60, 70, 220),
     }
 
@@ -201,9 +201,9 @@ class HUD(Entity):
         )
 
         # 2. Update Graph Cursor
-        # Map d in [0.5, 2.0] to cursor local x in [-0.5, 0.5] with margins
-        d_min = 0.5
-        d_max = 2.0
+        # Map d in [0.6, 3.0] to cursor local x in [-0.5, 0.5] with margins
+        d_min = 0.6
+        d_max = 3.0
         plot_norm_x = (distance - d_min) / (d_max - d_min)
         plot_norm_x = max(0.0, min(1.0, plot_norm_x))
         # Account for margin_l (50/512 ~ 0.097) and margin_r (30/512 ~ 0.058)
