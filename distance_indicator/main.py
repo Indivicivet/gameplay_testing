@@ -24,7 +24,6 @@ from ursina import (
 
 from config import CONFIG
 from math_curves import DistanceTracker
-from procedural_textures import generate_all_textures
 from fx_manager import FXManager, FXPreset
 from characters import Arena, Player, Opponent
 from hud import HUD
@@ -34,12 +33,6 @@ class DistanceIndicatorGame:
     """Core game application coordinating player, opponent, camera, and visual fx."""
 
     def __init__(self):
-        self.base_dir = Path(__file__).parent
-        self.assets_dir = self.base_dir / "assets"
-
-        # Generate texture assets
-        generate_all_textures(self.assets_dir)
-
         # Ursina window configuration
         window.title = "Distance Indicator Prototype"
         window.borderless = False
@@ -62,13 +55,13 @@ class DistanceIndicatorGame:
         self.cam_modes = ["3rd Person Follow", "Over-The-Shoulder", "1st Person"]
         self.cam_mode_idx = 0
 
-        # Subsystems
+        # Subsystems (Procedural textures generated directly in memory on launch ~120ms)
         self.distance_tracker = DistanceTracker(
             thresholds=CONFIG.thresholds,
             pulse_duration=CONFIG.cross_pulse_duration,
         )
-        self.fx_manager = FXManager(self.assets_dir)
-        self.hud = HUD(self.assets_dir)
+        self.fx_manager = FXManager()
+        self.hud = HUD()
 
         # Lock mouse for camera control
         mouse.locked = True

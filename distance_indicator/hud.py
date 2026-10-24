@@ -19,13 +19,8 @@ from config import CONFIG
 from fx_manager import PRESET_NAMES
 
 
-def create_curve_texture(
-    output_path: Path, width: int = 512, height: int = 256
-) -> Path:
-    """Renders the bumpy f(d) transfer function curve to an image matching Image 1."""
-    output_path = Path(output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
+def create_curve_texture(width: int = 512, height: int = 256) -> Texture:
+    """Renders the bumpy f(d) transfer function curve directly into an in-memory Texture."""
     img = Image.new("RGBA", (width, height), (16, 20, 28, 225))
     draw = ImageDraw.Draw(img)
 
@@ -56,11 +51,9 @@ def create_curve_texture(
 
     for thresh in CONFIG.thresholds:
         tx = margin_l + int(((thresh - d_min) / (d_max - d_min)) * plot_w)
-        # Dashed line
         col = threshold_colors.get(thresh, (100, 120, 150, 160))
         for y in range(margin_t, margin_t + plot_h, 8):
             draw.line([(tx, y), (tx, min(y + 4, margin_t + plot_h))], fill=col, width=1)
-        # Label
         draw.text(
             (tx - 12, margin_t + plot_h + 8), f"{thresh}m", fill=(180, 195, 215, 255)
         )
@@ -88,16 +81,14 @@ def create_curve_texture(
         (margin_l - 35, margin_t + plot_h - 10), "fx 0.0", fill=(140, 160, 180, 255)
     )
 
-    img.save(output_path, "PNG")
-    return output_path
+    return Texture(img)
 
 
 class HUD(Entity):
     """Manages all screen-space text, diagnostic graphs, and status readouts."""
 
-    def __init__(self, assets_dir: Path):
+    def __init__(self, curve_texture: Texture = None):
         super().__init__(parent=camera.ui)
-        self.assets_dir = Path(assets_dir)
 
         # Distance & Zone Readout Banner (Top Center)
         self.dist_text = Text(
@@ -118,13 +109,13 @@ class HUD(Entity):
         )
 
         # Graph Panel (Top Right)
-        graph_img_path = self.assets_dir / "curve_graph.png"
-        create_curve_texture(graph_img_path)
+        if curve_texture is None:
+            curve_texture = create_curve_texture()
 
         self.graph_panel = Entity(
             parent=self,
             model="quad",
-            texture=Texture(str(graph_img_path)),
+            texture=curve_texture,
             scale=(0.42, 0.21),
             position=(0.65, 0.35),
             color=color.white,

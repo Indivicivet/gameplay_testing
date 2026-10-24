@@ -4,10 +4,10 @@ Manages dynamic camera FOV, post-processing shader uniforms, speed lines overlay
 and presets.
 """
 
-from pathlib import Path
 from ursina import Entity, camera, Vec2, color, Texture
 import shaders
 from config import CONFIG
+from procedural_textures import generate_in_memory_textures
 
 
 class FXPreset:
@@ -30,8 +30,10 @@ PRESET_NAMES = {
 class FXManager:
     """Controls screen shaders, speed-line quads, and FOV transitions."""
 
-    def __init__(self, assets_dir: Path):
-        self.assets_dir = Path(assets_dir)
+    def __init__(self, textures: dict = None):
+        if textures is None:
+            textures = generate_in_memory_textures()
+
         self.preset = FXPreset.HYBRID_FULL
         self.zoom_const = CONFIG.zoom_const
         self.base_fov = CONFIG.base_fov
@@ -50,9 +52,9 @@ class FXManager:
             z=-1,  # Behind HUD text, in front of 3D scene
         )
 
-        self.texture_black = Texture(str(self.assets_dir / "speed_lines_black.png"))
-        self.texture_white = Texture(str(self.assets_dir / "speed_lines_white.png"))
-        self.texture_dense = Texture(str(self.assets_dir / "speed_lines_dense.png"))
+        self.texture_black = textures["black"]
+        self.texture_white = textures["white"]
+        self.texture_dense = textures["dense"]
 
         self.lines_overlay.texture = self.texture_black
 
