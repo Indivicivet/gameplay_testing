@@ -146,13 +146,13 @@ class HUD(Entity):
             text=(
                 "Controls:\n"
                 "  [W,A,S,D] Walk slowly\n"
-                "  [Mouse Orbit / Look] Camera\n"
+                "  [Mouse Look / Q, E] Orbit Camera\n"
+                "  [Left Click] Capture Mouse | [ESC] Free\n"
                 "  [1-5] Switch FX Preset\n"
-                "  [M] Toggle Opponent AI (Milling / Idle / Follow)\n"
-                "  [C] Switch Camera (3rd Person / Shoulder / 1st)\n"
+                "  [M] Opponent AI (Milling/Idle/Follow)\n"
+                "  [C] Camera View (3rd/Shoulder/1st)\n"
                 "  [ [ / ] ] Adjust ZOOM_CONST\n"
-                "  [R] Reset Positions\n"
-                "  [ESC] Exit"
+                "  [R] Reset Positions"
             ),
             position=(0.85, -0.48),
             origin=(0.5, -0.5),

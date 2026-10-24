@@ -58,11 +58,12 @@ $$\text{FOV} = \text{BASE\_FOV} + \text{ZOOM\_CONST} \cdot f(d) + \text{Pulse}$$
 
 | Key | Action |
 | :--- | :--- |
-| `W, A, S, D` / Arrows | Walk around (slow, deliberate testing pace) |
-| `Mouse Move` | Orbit / look camera |
-| `1, 2, 3, 4, 5` | Switch FX Preset |
-| `M` | Toggle Opponent AI (Milling $\rightarrow$ Standing Still $\rightarrow$ Follow) |
-| `C` | Toggle Camera (3rd-Person Follow $\rightarrow$ Over-the-Shoulder $\rightarrow$ 1st-Person) |
+| `W, A, S, D` | Walk around (slow, deliberate testing pace) |
+| `Mouse Move` / `Q, E` | Orbit camera (Mouse look or Q/E keys) |
+| `Left Click` | Capture mouse cursor |
+| `ESC` | Unlock / Lock mouse cursor |
+| `1, 2, 3, 4, 5` | Switch FX Preset (Sprint Blur, Manga Lines, Vignette, White Rush, Hybrid) |
+| `M` | Toggle Opponent AI (`Milling` $\rightarrow$ `Standing Still` $\rightarrow$ `Slow Advance`) |
+| `C` | Toggle Camera (`3rd-Person Follow` $\rightarrow$ `Over-The-Shoulder` $\rightarrow$ `1st-Person`) |
 | `[` / `]` | Decrease / Increase `ZOOM_CONST` ($\pm 2^\circ$) |
 | `R` | Reset player and opponent positions |
-| `ESC` | Unlock / Lock mouse cursor |

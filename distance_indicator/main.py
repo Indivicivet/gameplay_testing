@@ -5,7 +5,6 @@ and stepped response curves (Image 1) with motion/anime speed lines (Image 2).
 """
 
 import math
-from pathlib import Path
 from ursina import (
     Ursina,
     Entity,
@@ -15,7 +14,7 @@ from ursina import (
     window,
     color,
     mouse,
-    application,
+    time,
     held_keys,
     Sky,
     DirectionalLight,
@@ -29,15 +28,14 @@ from characters import Arena, Player, Opponent
 from hud import HUD
 
 
-class DistanceIndicatorGame:
-    """Core game application coordinating player, opponent, camera, and visual fx."""
+class DistanceIndicatorGame(Entity):
+    """Core game application coordinating player, opponent, camera, and visual fx.
 
-    def __init__(self):
-        # Ursina window configuration
-        window.title = "Distance Indicator Prototype"
-        window.borderless = False
-        window.size = (1280, 720)
-        window.color = color.rgb(18 / 255, 20 / 255, 26 / 255)
+    Inherits from Entity so Ursina's engine automatically calls update() every tick.
+    """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
         # Lighting & environment
         Sky(color=color.rgb(24 / 255, 28 / 255, 38 / 255))
@@ -63,8 +61,12 @@ class DistanceIndicatorGame:
         self.fx_manager = FXManager()
         self.hud = HUD()
 
-        # Lock mouse for camera control
+        # Capture mouse for camera look
         mouse.locked = True
+
+        # Immediately prime camera and first frame state
+        self.update_camera(0.016, instant=True)
+        self.update_game(0.016)
 
     def reset_positions(self):
         """Resets player and opponent to default testing positions."""
@@ -74,15 +76,27 @@ class DistanceIndicatorGame:
         self.opponent.rotation_y = 180
         self.camera_yaw = 0.0
         self.camera_pitch = 18.0
+        self.update_camera(0.016, instant=True)
 
-    def update_camera(self, dt: float):
+    def update_camera(self, dt: float, instant: bool = False):
         """Updates camera position and orientation based on selected camera mode."""
-        # Mouse look
+        # 1. Mouse Look (when locked or right-mouse dragging)
         if mouse.locked:
-            self.camera_yaw += mouse.velocity[0] * 70.0
+            self.camera_yaw += mouse.velocity[0] * 80.0
             self.camera_pitch = max(
-                -25.0, min(65.0, self.camera_pitch - mouse.velocity[1] * 70.0)
+                -25.0, min(65.0, self.camera_pitch - mouse.velocity[1] * 80.0)
             )
+        elif held_keys["right mouse"]:
+            self.camera_yaw += mouse.velocity[0] * 120.0
+            self.camera_pitch = max(
+                -25.0, min(65.0, self.camera_pitch - mouse.velocity[1] * 120.0)
+            )
+
+        # 2. Keyboard Orbit Fallback (Q / E keys)
+        if held_keys["q"]:
+            self.camera_yaw -= 85.0 * dt
+        if held_keys["e"]:
+            self.camera_yaw += 85.0 * dt
 
         rad_yaw = math.radians(self.camera_yaw)
         rad_pitch = math.radians(self.camera_pitch)
@@ -97,7 +111,10 @@ class DistanceIndicatorGame:
                 -math.cos(rad_yaw) * math.cos(rad_pitch) * cam_dist,
             )
             target_pos = self.player.position + offset
-            camera.position += (target_pos - camera.position) * min(1.0, dt * 15.0)
+            if instant:
+                camera.position = target_pos
+            else:
+                camera.position += (target_pos - camera.position) * min(1.0, dt * 18.0)
             look_target = self.player.position + Vec3(0, 1.25, 0)
             camera.look_at(look_target)
 
@@ -116,7 +133,10 @@ class DistanceIndicatorGame:
                 + right_vec * shoulder_offset
             )
             target_pos = self.player.position + offset
-            camera.position += (target_pos - camera.position) * min(1.0, dt * 18.0)
+            if instant:
+                camera.position = target_pos
+            else:
+                camera.position += (target_pos - camera.position) * min(1.0, dt * 20.0)
             look_target = self.opponent.position + Vec3(0, 1.3, 0)
             camera.look_at(look_target)
 
@@ -127,9 +147,13 @@ class DistanceIndicatorGame:
             camera.rotation_x = self.camera_pitch
 
     def input(self, key):
-        """Processes key presses."""
+        """Processes key presses and mouse clicks."""
+        # Mouse capture click
+        if key == "left mouse down" and not mouse.locked:
+            mouse.locked = True
+
         # Preset selection (1-5)
-        if key == "1":
+        elif key == "1":
             self.fx_manager.set_preset(FXPreset.SPRINT_BLUR)
         elif key == "2":
             self.fx_manager.set_preset(FXPreset.MANGA_LINES)
@@ -162,8 +186,15 @@ class DistanceIndicatorGame:
         elif key == "escape":
             mouse.locked = not mouse.locked
 
-    def update(self, dt: float):
+    def update(self):
+        """Standard Ursina Entity update tick called automatically each frame."""
+        self.update_game(time.dt)
+
+    def update_game(self, dt: float):
         """Main game loop update tick."""
+        # Clamp dt to prevent teleporting on frame stutter
+        dt = min(0.05, max(0.001, dt))
+
         # 1. Update Entities
         self.player.update_movement(dt, self.camera_yaw)
         self.opponent.update_ai(dt, self.player.position)
@@ -179,7 +210,7 @@ class DistanceIndicatorGame:
         # 4. Compute Distance Indicator Response & Crossing Pulse
         steady_fx, zone, pulse = self.distance_tracker.update(distance, dt)
 
-        # 5. Determine screen UV of opponent for directional blur centering
+        # 5. Determine screen UV center
         center_uv = Vec2(0.5, 0.5)
 
         # 6. Update Visual Effects (FOV, Shaders, Speed Lines, Vignette)
@@ -203,20 +234,26 @@ class DistanceIndicatorGame:
         )
 
 
-def main():
-    app = Ursina()
-    game = DistanceIndicatorGame()
+# Global game instance and module-level Ursina hooks
+app = Ursina(
+    title="Distance Indicator Prototype",
+    borderless=False,
+    size=(1280, 720),
+)
+window.color = color.rgb(18 / 255, 20 / 255, 26 / 255)
 
-    def update():
-        from ursina import time
+game = DistanceIndicatorGame()
 
-        game.update(time.dt)
 
-    def input(key):
-        game.input(key)
+def update():
+    """Top-level module update hook called by Ursina's main loop."""
+    game.update_game(time.dt)
 
-    app.run()
+
+def input(key):
+    """Top-level module input hook called by Ursina's input handler."""
+    game.input(key)
 
 
 if __name__ == "__main__":
-    main()
+    app.run()
