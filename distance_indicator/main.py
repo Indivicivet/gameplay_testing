@@ -155,6 +155,10 @@ class DistanceIndicatorGame(Entity):
         elif key == "m":
             self.opponent.toggle_state()
 
+        # Toggle floor distance rings (spoilers)
+        elif key == "z":
+            self.arena.toggle_rings()
+
         # Cycle camera mode
         elif key == "c":
             self.cam_mode_idx = (self.cam_mode_idx + 1) % len(self.cam_modes)
@@ -162,9 +166,9 @@ class DistanceIndicatorGame(Entity):
 
         # Adjust ZOOM_CONST (Field of View modulation)
         elif key == "[":
-            self.fx_manager.zoom_const = max(-25.0, self.fx_manager.zoom_const - 2.5)
+            self.fx_manager.zoom_const = max(-30.0, self.fx_manager.zoom_const - 4.0)
         elif key == "]":
-            self.fx_manager.zoom_const = min(35.0, self.fx_manager.zoom_const + 2.5)
+            self.fx_manager.zoom_const = min(50.0, self.fx_manager.zoom_const + 4.0)
 
         # Reset positions
         elif key == "r":
@@ -221,6 +225,7 @@ class DistanceIndicatorGame(Entity):
             opponent_state=self.opponent.state,
             cam_mode=self.cam_modes[self.cam_mode_idx],
             current_fov=camera.fov,
+            rings_visible=self.arena.show_rings,
         )
 
 

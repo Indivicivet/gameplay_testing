@@ -1,7 +1,7 @@
 """In-memory procedural texture generation for distance indicators.
 
-Generates manga speed lines (Image 2 style) directly into memory at startup.
-No disk file generation or committed image assets needed (~120ms total).
+Generates manga speed lines (Image 2 style) across 4 distinct distance tiers
+directly into memory at startup (~40ms total).
 """
 
 import math
@@ -15,6 +15,8 @@ def create_speed_lines_image(
     num_lines: int = 220,
     size: int = 1024,
     inner_radius_ratio: float = 0.28,
+    min_width: float = 3.5,
+    max_width: float = 11.5,
     seed: int = 42,
 ) -> Image.Image:
     """Generates an action speed-lines PIL Image matching Image 2 in memory."""
@@ -26,14 +28,14 @@ def create_speed_lines_image(
 
     for i in range(num_lines):
         angle = (i / float(num_lines)) * 2.0 * math.pi + rng.uniform(-0.02, 0.02)
-        inner_r = size * (inner_radius_ratio + rng.uniform(-0.06, 0.08))
+        inner_r = size * (inner_radius_ratio + rng.uniform(-0.04, 0.06))
         outer_r = size * 0.98
 
         x1 = center + inner_r * math.cos(angle)
         y1 = center + inner_r * math.sin(angle)
 
         perp = angle + math.pi / 2.0
-        width = rng.uniform(3.5, 11.5)
+        width = rng.uniform(min_width, max_width)
 
         x2_base = center + outer_r * math.cos(angle)
         y2_base = center + outer_r * math.sin(angle)
@@ -49,29 +51,79 @@ def create_speed_lines_image(
     return img
 
 
+def make_white_rush_variant(img: Image.Image) -> Image.Image:
+    """Instantly converts black manga line texture to crisp white rush line texture via NumPy."""
+    arr = np.array(img)
+    arr[:, :, :3] = 255
+    return Image.fromarray(arr)
+
+
 def generate_in_memory_textures() -> dict:
-    """Creates in-memory Ursina Textures for all visual presets (~100-150ms)."""
-    img_black = create_speed_lines_image(
-        line_color=(6, 8, 12, 255),
-        num_lines=230,
-        inner_radius_ratio=0.26,
+    """Creates in-memory Ursina Textures for 4 distinct distance tiers (~40-60ms)."""
+    # Tier 1 (Alert: 2.5m - 2.0m): Sparse corner speed marks, wide open aperture
+    img_t1_black = create_speed_lines_image(
+        line_color=(6, 8, 12, 240),
+        num_lines=110,
+        inner_radius_ratio=0.40,
+        min_width=2.5,
+        max_width=7.0,
         seed=101,
     )
-    img_white = create_speed_lines_image(
-        line_color=(255, 255, 255, 235),
-        num_lines=200,
-        inner_radius_ratio=0.28,
+    # Tier 2 (Threat: 2.0m - 1.5m): Medium speed lines, moderate aperture
+    img_t2_black = create_speed_lines_image(
+        line_color=(6, 8, 12, 248),
+        num_lines=190,
+        inner_radius_ratio=0.32,
+        min_width=3.5,
+        max_width=9.5,
         seed=202,
     )
-    img_dense = create_speed_lines_image(
-        line_color=(8, 10, 16, 255),
-        num_lines=300,
-        inner_radius_ratio=0.20,
+    # Tier 3 (Danger: 1.5m - 1.0m): Dense manga lines, tighter aperture
+    img_t3_black = create_speed_lines_image(
+        line_color=(6, 8, 12, 255),
+        num_lines=280,
+        inner_radius_ratio=0.24,
+        min_width=4.5,
+        max_width=12.0,
         seed=303,
     )
+    # Tier 4 (Clinch: < 1.0m): Maximum storm lines, tight focus tunnel
+    img_t4_black = create_speed_lines_image(
+        line_color=(6, 8, 12, 255),
+        num_lines=390,
+        inner_radius_ratio=0.16,
+        min_width=5.5,
+        max_width=14.5,
+        seed=404,
+    )
+
+    # White rush variants
+    img_t1_white = make_white_rush_variant(img_t1_black)
+    img_t2_white = make_white_rush_variant(img_t2_black)
+    img_t3_white = make_white_rush_variant(img_t3_black)
+    img_t4_white = make_white_rush_variant(img_t4_black)
+
+    tex_t1_b = Texture(img_t1_black)
+    tex_t2_b = Texture(img_t2_black)
+    tex_t3_b = Texture(img_t3_black)
+    tex_t4_b = Texture(img_t4_black)
+
+    tex_t1_w = Texture(img_t1_white)
+    tex_t2_w = Texture(img_t2_white)
+    tex_t3_w = Texture(img_t3_white)
+    tex_t4_w = Texture(img_t4_white)
 
     return {
-        "black": Texture(img_black),
-        "white": Texture(img_white),
-        "dense": Texture(img_dense),
+        "tier1_black": tex_t1_b,
+        "tier2_black": tex_t2_b,
+        "tier3_black": tex_t3_b,
+        "tier4_black": tex_t4_b,
+        "tier1_white": tex_t1_w,
+        "tier2_white": tex_t2_w,
+        "tier3_white": tex_t3_w,
+        "tier4_white": tex_t4_w,
+        # Aliases for convenience
+        "black": tex_t2_b,
+        "dense": tex_t4_b,
+        "white": tex_t4_w,
     }

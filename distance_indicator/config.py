@@ -14,8 +14,10 @@ class DistanceConfig:
     step_width: float = 0.08
 
     # FoV scaling: fov = base_fov + zoom_const * f(d) + kick + breathing
-    base_fov: float = 62.0
-    zoom_const: float = 10.0  # Light, comfortable FoV dilation across tiers
+    base_fov: float = 60.0
+    zoom_const: float = (
+        24.0  # Big, distinct FoV jumps across tiers (60° -> 66° -> 72° -> 78° -> 84°)
+    )
 
     # Movement speeds (slowed down by 30% for careful distance testing)
     player_walk_speed: float = 1.26

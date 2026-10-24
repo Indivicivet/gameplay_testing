@@ -14,35 +14,63 @@ from main import game, app
 out_dir = Path(__file__).parent / "screenshots"
 out_dir.mkdir(exist_ok=True)
 
-# Test cases: (name, player_pos, opponent_pos, preset_id, yaw)
+# Test cases: (name, player_pos, opponent_pos, preset_id, yaw, show_rings)
 scenarios = [
     (
-        "01_safe_light_arena.png",
-        Vec3(0, 0, -3.2),
+        "01_safe_zone_rings_on.png",
+        Vec3(0, 0, -3.1),
         Vec3(0, 0, 0),
-        2,  # Manga Lines
+        5,  # Hybrid
         0.0,
+        True,
     ),
     (
-        "02_threat_light_arena.png",
-        Vec3(0, 0, -1.9),
+        "02_zone1_alert_manga.png",
+        Vec3(0, 0, -2.25),
         Vec3(0, 0, 0),
-        2,  # Manga Lines
+        2,  # Manga Lines Tier 1
         0.0,
+        True,
     ),
     (
-        "03_clinch_high_contrast_manga.png",
-        Vec3(0, 0, -0.95),
+        "03_zone2_threat_manga.png",
+        Vec3(0, 0, -1.75),
         Vec3(0, 0, 0),
-        2,  # Manga Lines
+        2,  # Manga Lines Tier 2
         0.0,
+        True,
     ),
     (
-        "04_clinch_hybrid_all_fx.png",
-        Vec3(0, 0, -0.95),
+        "04_zone3_danger_manga.png",
+        Vec3(0, 0, -1.25),
+        Vec3(0, 0, 0),
+        2,  # Manga Lines Tier 3
+        0.0,
+        True,
+    ),
+    (
+        "05_zone4_clinch_manga.png",
+        Vec3(0, 0, -0.85),
+        Vec3(0, 0, 0),
+        2,  # Manga Lines Tier 4
+        0.0,
+        True,
+    ),
+    (
+        "06_zone4_pure_optical_blur.png",
+        Vec3(0, 0, -0.85),
+        Vec3(0, 0, 0),
+        1,  # Sprint / Radial Blur (pure optical, no chromatic aberration)
+        0.0,
+        True,
+    ),
+    (
+        "07_zone4_rings_hidden_spoiler_toggle.png",
+        Vec3(0, 0, -0.85),
         Vec3(0, 0, 0),
         5,  # Hybrid Full
         0.0,
+        False,  # Ground spoiler rings hidden
     ),
 ]
 
@@ -53,11 +81,14 @@ def capture_all():
         game.update_game(0.016)
         application.base.graphicsEngine.renderFrame()
 
-    for filename, player_p, opp_p, preset, yaw in scenarios:
+    for filename, player_p, opp_p, preset, yaw, show_rings in scenarios:
         game.player.position = player_p
         game.opponent.position = opp_p
         game.camera_yaw = yaw
         game.fx_manager.set_preset(preset)
+        game.arena.show_rings = show_rings
+        for ring, _ in game.arena.rings:
+            ring.enabled = show_rings
 
         # Step multiple ticks to allow smooth dampening and shaders to settle
         for _ in range(35):

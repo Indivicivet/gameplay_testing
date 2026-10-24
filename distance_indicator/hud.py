@@ -145,7 +145,7 @@ class HUD(Entity):
         self.info_bg = Entity(
             parent=self,
             model="quad",
-            scale=(0.56, 0.18),
+            scale=(0.56, 0.22),
             position=(-0.59, -0.37),
             color=color.rgba(12 / 255, 16 / 255, 24 / 255, 0.88),
             z=0.02,
@@ -153,7 +153,7 @@ class HUD(Entity):
         self.info_text = Text(
             parent=self,
             text="",
-            position=(-0.84, -0.44),
+            position=(-0.84, -0.46),
             origin=(-0.5, -0.5),
             scale=0.9,
             color=color.rgb(220 / 255, 230 / 255, 245 / 255),
@@ -164,8 +164,8 @@ class HUD(Entity):
         self.help_bg = Entity(
             parent=self,
             model="quad",
-            scale=(0.48, 0.30),
-            position=(0.64, -0.33),
+            scale=(0.50, 0.33),
+            position=(0.64, -0.32),
             color=color.rgba(12 / 255, 16 / 255, 24 / 255, 0.88),
             z=0.02,
         )
@@ -177,12 +177,13 @@ class HUD(Entity):
                 "  [Mouse Look / Q, E] Orbit Camera\n"
                 "  [Left Click] Capture Mouse | [ESC] Free\n"
                 "  [1-5] Switch FX Preset\n"
+                "  [Z] Toggle Floor Rings (Spoilers)\n"
                 "  [M] Opponent AI (Milling/Idle/Follow)\n"
                 "  [C] Camera View (3rd/Shoulder/1st)\n"
                 "  [ [ / ] ] Adjust ZOOM_CONST (FoV Mod)\n"
                 "  [R] Reset Positions"
             ),
-            position=(0.85, -0.46),
+            position=(0.85, -0.47),
             origin=(0.5, -0.5),
             scale=0.75,
             color=color.rgb(195 / 255, 210 / 255, 230 / 255),
@@ -198,7 +199,8 @@ class HUD(Entity):
         zoom_const: float,
         opponent_state: str,
         cam_mode: str,
-        current_fov: float = 62.0,
+        current_fov: float = 60.0,
+        rings_visible: bool = True,
     ):
         """Updates text readouts and graph cursor position."""
         # 1. Distance & Zone text
@@ -243,10 +245,12 @@ class HUD(Entity):
         self.graph_cursor.position = Vec2(local_x, local_y)
 
         # 3. Status info
+        rings_str = "ON" if rings_visible else "OFF (Hidden)"
         preset_label = PRESET_NAMES.get(preset_id, "Unknown")
         self.info_text.text = (
             f"Active FX Preset:  {preset_label}\n"
             f"Field of View:     {current_fov:4.1f}° (Mod: {zoom_const:+.1f}°)\n"
+            f"Ground Rings [Z]:  {rings_str}\n"
             f"Opponent Mode:     {opponent_state}\n"
             f"Camera Mode:       {cam_mode}"
         )

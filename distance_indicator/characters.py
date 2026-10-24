@@ -51,6 +51,7 @@ class Arena(Entity):
 
         # Concentric distance rings on floor (rendered as flat circles)
         self.rings = []
+        self.show_rings = True
         ring_colors = [
             color.rgba(0.12, 0.50, 0.95, 0.65),  # 2.5m Alert (Azure Blue)
             color.rgba(0.92, 0.70, 0.10, 0.72),  # 2.0m Threat (Amber Gold)
@@ -58,7 +59,7 @@ class Arena(Entity):
             color.rgba(0.95, 0.12, 0.16, 0.88),  # 1.0m Clinch (Crimson Red)
         ]
 
-        # Draw rings from largest (1.6m) to smallest (1.0m)
+        # Draw rings from largest (2.5m) to smallest (1.0m)
         for i, radius in enumerate(thresholds):
             col = ring_colors[i % len(ring_colors)]
             ring_entity = Entity(
@@ -70,8 +71,17 @@ class Arena(Entity):
             )
             self.rings.append((ring_entity, radius))
 
+    def toggle_rings(self) -> bool:
+        """Toggles floor rings visibility on/off (distance spoiler toggle)."""
+        self.show_rings = not self.show_rings
+        for ring, _ in self.rings:
+            ring.enabled = self.show_rings
+        return self.show_rings
+
     def update_rings_position(self, target_pos: Vec3):
         """Keep distance rings centered under the opponent."""
+        if not self.show_rings:
+            return
         for ring, _ in self.rings:
             ring.x = target_pos.x
             ring.z = target_pos.z

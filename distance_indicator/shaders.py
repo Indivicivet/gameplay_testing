@@ -1,6 +1,6 @@
 """GLSL post-processing shaders for camera effects.
 
-Includes radial zoom blur, chromatic aberration, vignette, and boundary flash.
+Includes high-quality optical radial zoom blur and peripheral vignette.
 """
 
 from ursina.shader import Shader
@@ -15,47 +15,44 @@ uniform sampler2D tex;
 in vec2 uv;
 out vec4 fragColor;
 
-uniform float blur_intensity;       // Radial blur strength
-uniform float chromatic_amount;     // Chromatic aberration (RGB shift)
-uniform float vignette_intensity;   // Edge darkening
-uniform float flash_intensity;      // Bright edge/vignette flash on threshold cross
+uniform float blur_intensity;       // Radial optical zoom blur strength
+uniform float vignette_intensity;   // Peripheral edge darkening
 uniform vec2 center;                // Blur center (screen UV coordinates)
 
 void main() {
     vec2 to_uv = uv - center;
     float dist = length(to_uv);
-    vec2 dir = normalize(to_uv);
+    vec2 dir = (dist > 0.0001) ? normalize(to_uv) : vec2(0.0);
 
-    // 1. Radial / Zoom Blur
+    // 1. High-Quality Optical Radial Zoom Blur
+    // Center is crisp and clear; blur smoothly radiates outward towards screen edges
     vec4 sum = vec4(0.0);
-    const int SAMPLES = 10;
-    float step_scale = (blur_intensity * 0.05 * smoothstep(0.1, 0.9, dist)) / float(SAMPLES);
+    float total_weight = 0.0;
+    const int SAMPLES = 16;
+
+    // Edge falloff: keep center viewing area crisp
+    float edge_falloff = smoothstep(0.12, 0.85, dist);
+    float max_blur_dist = blur_intensity * 0.048 * edge_falloff;
 
     for (int i = 0; i < SAMPLES; i++) {
-        vec2 sample_uv = uv - dir * (float(i) * step_scale);
-        sum += texture(tex, clamp(sample_uv, 0.0, 1.0));
+        float t = float(i) / float(SAMPLES - 1);
+        vec2 sample_uv = uv - dir * (t * max_blur_dist);
+        float weight = 1.0 - t * 0.55; // Natural smooth attenuation
+        sum += texture(tex, clamp(sample_uv, 0.0, 1.0)) * weight;
+        total_weight += weight;
     }
-    vec4 blurred = sum / float(SAMPLES);
+    vec4 blurred = sum / total_weight;
 
-    // 2. Chromatic Aberration on edge pixels
-    float ca = chromatic_amount * dist * 0.035;
-    float r = texture(tex, clamp(uv + dir * ca, 0.0, 1.0)).r;
-    float g = blurred.g;
-    float b = texture(tex, clamp(uv - dir * ca, 0.0, 1.0)).b;
-    vec3 col = mix(blurred.rgb, vec3(r, g, b), clamp(chromatic_amount * 1.5, 0.0, 1.0));
-
-    // 3. Vignette (Edge Darkening)
-    float vig = smoothstep(0.4, 0.95, dist);
-    col = mix(col, col * (1.0 - vignette_intensity * 0.8), vig);
+    // 2. Peripheral Vignette (Subtle edge contrast framing)
+    float vig = smoothstep(0.35, 0.95, dist);
+    vec3 col = mix(blurred.rgb, blurred.rgb * (1.0 - vignette_intensity * 0.75), vig);
 
     fragColor = vec4(col, 1.0);
 }
 """,
     default_input=dict(
         blur_intensity=0.0,
-        chromatic_amount=0.0,
         vignette_intensity=0.0,
-        flash_intensity=0.0,
         center=Vec2(0.5, 0.5),
     ),
 )
