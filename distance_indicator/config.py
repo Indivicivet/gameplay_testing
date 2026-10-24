@@ -14,10 +14,9 @@ class DistanceConfig:
     step_width: float = 0.08
 
     # FoV scaling: fov = base_fov + zoom_const * f(d) + kick + breathing
-    base_fov: float = 60.0
-    zoom_const: float = (
-        24.0  # Big, distinct FoV jumps across tiers (60° -> 66° -> 72° -> 78° -> 84°)
-    )
+    # FoV tightens as you get closer for heightened dramatic impact and looming proximity
+    base_fov: float = 72.0
+    zoom_const: float = -24.0  # Tightens from 72° (safe) down to 48° (clinch)
 
     # Movement speeds (slowed down by 30% for careful distance testing)
     player_walk_speed: float = 1.26

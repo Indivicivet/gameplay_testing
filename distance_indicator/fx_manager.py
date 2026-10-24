@@ -70,12 +70,13 @@ class FXManager:
         center_uv: Vec2 = Vec2(0.5, 0.5),
     ):
         """Updates all visual effects across 4 consistent distance tiers."""
-        # 1. Field of View Modulation across distance zones (big, punchy jumps)
-        # - Stepped widening linked to the bumpy transfer function f(d)
-        # - Punchy +5.0 deg optical kick when crossing into a closer tier
+        # 1. Field of View Modulation across distance zones (tightens as you get closer)
+        # - Stepped tightening linked to the bumpy transfer function f(d)
+        # - Punchy inward zoom kick when crossing into a closer tier
         # - Subtle breathing cycle when in the infighting clinch zone
         step_zoom = self.zoom_const * steady_fx
-        transition_kick = cross_pulse * 5.0
+        kick_sign = -1.0 if self.zoom_const <= 0 else 1.0
+        transition_kick = kick_sign * cross_pulse * 5.0
         breathing = 0.8 * math.sin(time.time() * 4.0) if zone == 4 else 0.0
         target_fov = self.base_fov + step_zoom + transition_kick + breathing
         self.fov_smooth += (target_fov - self.fov_smooth) * min(1.0, dt * 16.0)

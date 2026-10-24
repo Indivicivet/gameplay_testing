@@ -166,9 +166,9 @@ class DistanceIndicatorGame(Entity):
 
         # Adjust ZOOM_CONST (Field of View modulation)
         elif key == "[":
-            self.fx_manager.zoom_const = max(-30.0, self.fx_manager.zoom_const - 4.0)
+            self.fx_manager.zoom_const = max(-45.0, self.fx_manager.zoom_const - 4.0)
         elif key == "]":
-            self.fx_manager.zoom_const = min(50.0, self.fx_manager.zoom_const + 4.0)
+            self.fx_manager.zoom_const = min(30.0, self.fx_manager.zoom_const + 4.0)
 
         # Reset positions
         elif key == "r":
