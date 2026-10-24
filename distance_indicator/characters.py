@@ -159,35 +159,35 @@ class Player(Mannequin):
             0  # 0: Follow Third-Person, 1: Over-Shoulder, 2: First-Person
         )
 
-    def update_movement(self, dt: float, camera_yaw: float):
-        """Processes WASD movement relative to camera direction."""
-        move_dir = Vec3(0, 0, 0)
+    def update_movement(self, dt: float, camera_yaw: float, strafe_mode: bool = False):
+        """Processes standard FPS/TPS WASD movement relative to camera yaw."""
+        rad = math.radians(camera_yaw)
+        cam_forward = Vec3(math.sin(rad), 0, math.cos(rad))
+        cam_right = Vec3(math.cos(rad), 0, -math.sin(rad))
 
-        # Keyboard input
-        if held_keys["w"] or held_keys["up arrow"]:
-            move_dir += Vec3(0, 0, 1)
-        if held_keys["s"] or held_keys["down arrow"]:
-            move_dir += Vec3(0, 0, -1)
-        if held_keys["a"] or held_keys["left arrow"]:
-            move_dir += Vec3(-1, 0, 0)
-        if held_keys["d"] or held_keys["right arrow"]:
-            move_dir += Vec3(1, 0, 0)
+        # Standard forward/back and left/right strafing input
+        input_forward = (held_keys["w"] or held_keys["up arrow"]) - (
+            held_keys["s"] or held_keys["down arrow"]
+        )
+        input_right = (held_keys["d"] or held_keys["right arrow"]) - (
+            held_keys["a"] or held_keys["left arrow"]
+        )
 
-        is_moving = move_dir.length_squared() > 0.001
+        world_dir = cam_forward * input_forward + cam_right * input_right
+
+        is_moving = world_dir.length_squared() > 0.001
         if is_moving:
-            move_dir = move_dir.normalized()
-            # Rotate movement relative to camera horizontal yaw
-            rad = math.radians(camera_yaw)
-            world_x = move_dir.x * math.cos(rad) + move_dir.z * math.sin(rad)
-            world_z = -move_dir.x * math.sin(rad) + move_dir.z * math.cos(rad)
-            world_dir = Vec3(world_x, 0, world_z)
-
-            # Move slowly
+            world_dir = world_dir.normalized()
             self.position += world_dir * self.speed * dt
 
-            # Turn player towards movement heading
-            target_rot = math.degrees(math.atan2(world_dir.x, world_dir.z))
-            self.rotation_y = target_rot
+            if strafe_mode:
+                # In strafe / FPS / over-shoulder mode, player body faces camera look direction
+                self.rotation_y = camera_yaw
+            else:
+                # In standard TPS mode, player turns smoothly to face movement heading
+                target_rot = math.degrees(math.atan2(world_dir.x, world_dir.z))
+                angle_diff = (target_rot - self.rotation_y + 180) % 360 - 180
+                self.rotation_y += angle_diff * min(1.0, dt * 14.0)
 
             # Procedural walking animation
             self.walk_phase += dt * 8.0
@@ -197,6 +197,8 @@ class Player(Mannequin):
             self.right_arm.rotation_x = math.sin(self.walk_phase) * 24.0
             self.torso.y = 1.05 + abs(math.sin(self.walk_phase)) * 0.04
         else:
+            if strafe_mode:
+                self.rotation_y = camera_yaw
             # Idle damping
             self.left_leg.rotation_x *= 0.8
             self.right_leg.rotation_x *= 0.8

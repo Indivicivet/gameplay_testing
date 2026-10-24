@@ -47,9 +47,13 @@ class DistanceIndicatorGame(Entity):
         self.player = Player(position=(0, 0, -2.5))
         self.opponent = Opponent(position=(0, 0, 0))
 
-        # Camera control parameters
+        # Standard FPS/TPS Camera Boom Rig (clean spherical orbit with zero roll/jitter)
+        self.camera_pivot = Entity(name="camera_pivot")
+        camera.parent = self.camera_pivot
+        self.cam_distance = 3.6
         self.camera_yaw = 0.0
-        self.camera_pitch = 18.0
+        self.camera_pitch = 14.0
+        self.mouse_sensitivity = 40.0
         self.cam_modes = ["3rd Person Follow", "Over-The-Shoulder", "1st Person"]
         self.cam_mode_idx = 0
 
@@ -65,7 +69,7 @@ class DistanceIndicatorGame(Entity):
         mouse.locked = True
 
         # Immediately prime camera and first frame state
-        self.update_camera(0.016, instant=True)
+        self.update_camera(0.016)
         self.update_game(0.016)
 
     def reset_positions(self):
@@ -75,82 +79,65 @@ class DistanceIndicatorGame(Entity):
         self.opponent.position = Vec3(0, 0, 0)
         self.opponent.rotation_y = 180
         self.camera_yaw = 0.0
-        self.camera_pitch = 18.0
-        self.update_camera(0.016, instant=True)
+        self.camera_pitch = 14.0
+        self.cam_distance = 3.6
+        self.update_camera(0.016)
 
-    def update_camera(self, dt: float, instant: bool = False):
-        """Updates camera position and orientation based on selected camera mode."""
-        # 1. Mouse Look (when locked or right-mouse dragging)
+    def update_camera(self, dt: float):
+        """Updates camera position and orientation using a standard FPS/TPS boom rig."""
+        # 1. Pivot smoothly anchors to player chest level
+        self.camera_pivot.position = self.player.position + Vec3(0, 1.4, 0)
+
+        # 2. Mouse Look (when locked or right-mouse dragging)
         if mouse.locked:
-            self.camera_yaw += mouse.velocity[0] * 80.0
-            self.camera_pitch = max(
-                -25.0, min(65.0, self.camera_pitch - mouse.velocity[1] * 80.0)
-            )
+            dx = max(-0.25, min(0.25, mouse.velocity[0]))
+            dy = max(-0.25, min(0.25, mouse.velocity[1]))
+            self.camera_yaw += dx * self.mouse_sensitivity
+            self.camera_pitch -= dy * self.mouse_sensitivity
+            self.camera_pitch = max(-35.0, min(65.0, self.camera_pitch))
         elif held_keys["right mouse"]:
-            self.camera_yaw += mouse.velocity[0] * 120.0
-            self.camera_pitch = max(
-                -25.0, min(65.0, self.camera_pitch - mouse.velocity[1] * 120.0)
-            )
+            dx = max(-0.25, min(0.25, mouse.velocity[0]))
+            dy = max(-0.25, min(0.25, mouse.velocity[1]))
+            self.camera_yaw += dx * (self.mouse_sensitivity * 1.5)
+            self.camera_pitch -= dy * (self.mouse_sensitivity * 1.5)
+            self.camera_pitch = max(-35.0, min(65.0, self.camera_pitch))
 
-        # 2. Keyboard Orbit Fallback (Q / E keys)
+        # 3. Keyboard Orbit Fallback (Q / E keys)
         if held_keys["q"]:
-            self.camera_yaw -= 85.0 * dt
+            self.camera_yaw -= 80.0 * dt
         if held_keys["e"]:
-            self.camera_yaw += 85.0 * dt
+            self.camera_yaw += 80.0 * dt
 
-        rad_yaw = math.radians(self.camera_yaw)
-        rad_pitch = math.radians(self.camera_pitch)
+        # 4. Apply clean Euler rotations to the pivot
+        self.camera_pivot.rotation_y = self.camera_yaw
+        self.camera_pivot.rotation_x = self.camera_pitch
+        self.camera_pivot.rotation_z = 0.0
 
+        # 5. Position Camera relative to pivot boom
         if self.cam_mode_idx == 0:
-            # 3rd Person Follow Camera
-            cam_dist = 4.2
-            cam_height = 1.9
-            offset = Vec3(
-                -math.sin(rad_yaw) * math.cos(rad_pitch) * cam_dist,
-                math.sin(rad_pitch) * cam_dist + cam_height,
-                -math.cos(rad_yaw) * math.cos(rad_pitch) * cam_dist,
-            )
-            target_pos = self.player.position + offset
-            if instant:
-                camera.position = target_pos
-            else:
-                camera.position += (target_pos - camera.position) * min(1.0, dt * 18.0)
-            look_target = self.player.position + Vec3(0, 1.25, 0)
-            camera.look_at(look_target)
-
+            # Standard 3rd Person Follow Camera
+            camera.position = Vec3(0, 0, -self.cam_distance)
+            camera.rotation = Vec3(0, 0, 0)
         elif self.cam_mode_idx == 1:
             # Over-The-Shoulder Camera
-            cam_dist = 2.4
-            shoulder_offset = 0.55
-            cam_height = 1.6
-            right_vec = Vec3(math.cos(rad_yaw), 0, -math.sin(rad_yaw))
-            offset = (
-                Vec3(
-                    -math.sin(rad_yaw) * math.cos(rad_pitch) * cam_dist,
-                    math.sin(rad_pitch) * cam_dist + cam_height,
-                    -math.cos(rad_yaw) * math.cos(rad_pitch) * cam_dist,
-                )
-                + right_vec * shoulder_offset
-            )
-            target_pos = self.player.position + offset
-            if instant:
-                camera.position = target_pos
-            else:
-                camera.position += (target_pos - camera.position) * min(1.0, dt * 20.0)
-            look_target = self.opponent.position + Vec3(0, 1.3, 0)
-            camera.look_at(look_target)
-
+            camera.position = Vec3(0.55, 0.1, -2.0)
+            camera.rotation = Vec3(0, 0, 0)
         elif self.cam_mode_idx == 2:
             # 1st Person Camera
-            camera.position = self.player.position + Vec3(0, 1.65, 0)
-            camera.rotation_y = self.camera_yaw
-            camera.rotation_x = self.camera_pitch
+            camera.position = Vec3(0, 0.28, 0.1)
+            camera.rotation = Vec3(0, 0, 0)
 
     def input(self, key):
         """Processes key presses and mouse clicks."""
         # Mouse capture click
         if key == "left mouse down" and not mouse.locked:
             mouse.locked = True
+
+        # Mouse Wheel Camera Zoom
+        elif key == "scroll up":
+            self.cam_distance = max(1.5, self.cam_distance - 0.35)
+        elif key == "scroll down":
+            self.cam_distance = min(6.5, self.cam_distance + 0.35)
 
         # Preset selection (1-5)
         elif key == "1":
@@ -171,6 +158,7 @@ class DistanceIndicatorGame(Entity):
         # Cycle camera mode
         elif key == "c":
             self.cam_mode_idx = (self.cam_mode_idx + 1) % len(self.cam_modes)
+            self.update_camera(0.016)
 
         # Adjust ZOOM_CONST
         elif key == "[":
@@ -196,7 +184,8 @@ class DistanceIndicatorGame(Entity):
         dt = min(0.05, max(0.001, dt))
 
         # 1. Update Entities
-        self.player.update_movement(dt, self.camera_yaw)
+        strafe_mode = self.cam_mode_idx in (1, 2)
+        self.player.update_movement(dt, self.camera_yaw, strafe_mode=strafe_mode)
         self.opponent.update_ai(dt, self.player.position)
         self.arena.update_rings_position(self.opponent.position)
 
