@@ -156,7 +156,7 @@ class DistanceIndicatorGame(Entity):
             self.opponent.toggle_state()
 
         # Toggle floor distance rings (spoilers)
-        elif key == "z":
+        elif key in ("z", "Z", "z down", "t", "T", "t down"):
             self.arena.toggle_rings()
 
         # Cycle camera mode

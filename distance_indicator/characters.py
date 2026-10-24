@@ -49,9 +49,10 @@ class Arena(Entity):
                 color=color.rgb(0.32, 0.36, 0.44),
             )
 
-        # Concentric distance rings on floor (rendered as flat circles)
+        # Concentric distance rings on floor (rendered as flat circles parented to rings_root)
         self.rings = []
         self.show_rings = True
+        self.rings_root = Entity(name="rings_root")
         ring_colors = [
             color.rgba(0.12, 0.50, 0.95, 0.65),  # 2.5m Alert (Azure Blue)
             color.rgba(0.92, 0.70, 0.10, 0.72),  # 2.0m Threat (Amber Gold)
@@ -63,6 +64,7 @@ class Arena(Entity):
         for i, radius in enumerate(thresholds):
             col = ring_colors[i % len(ring_colors)]
             ring_entity = Entity(
+                parent=self.rings_root,
                 model="circle",
                 rotation_x=90,
                 scale=(radius * 2.0, radius * 2.0, 1),
@@ -74,7 +76,10 @@ class Arena(Entity):
     def toggle_rings(self) -> bool:
         """Toggles floor rings visibility on/off (distance spoiler toggle)."""
         self.show_rings = not self.show_rings
+        self.rings_root.visible = self.show_rings
+        self.rings_root.enabled = self.show_rings
         for ring, _ in self.rings:
+            ring.visible = self.show_rings
             ring.enabled = self.show_rings
         return self.show_rings
 
@@ -82,9 +87,8 @@ class Arena(Entity):
         """Keep distance rings centered under the opponent."""
         if not self.show_rings:
             return
-        for ring, _ in self.rings:
-            ring.x = target_pos.x
-            ring.z = target_pos.z
+        self.rings_root.x = target_pos.x
+        self.rings_root.z = target_pos.z
 
 
 class Mannequin(Entity):
