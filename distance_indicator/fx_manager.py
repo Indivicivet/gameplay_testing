@@ -84,9 +84,9 @@ class FXManager:
 
         # 2. Consistent 4-Tier Visual Progression
         tier = max(1, min(4, zone)) if zone > 0 else 1
-        tier_alpha_levels = {0: 0.0, 1: 0.55, 2: 0.75, 3: 0.90, 4: 1.0}
-        tier_blur_levels = {0: 0.0, 1: 0.25, 2: 0.50, 3: 0.75, 4: 1.0}
-        tier_vig_levels = {0: 0.0, 1: 0.20, 2: 0.40, 3: 0.60, 4: 0.80}
+        tier_alpha_levels = {0: 0.0, 1: 0.65, 2: 0.80, 3: 0.92, 4: 1.0}
+        tier_blur_levels = {0: 0.0, 1: 0.35, 2: 0.55, 3: 0.78, 4: 1.0}
+        tier_vig_levels = {0: 0.0, 1: 0.28, 2: 0.48, 3: 0.68, 4: 0.85}
 
         base_alpha = tier_alpha_levels.get(zone, 0.0)
         base_blur = tier_blur_levels.get(zone, 0.0)
@@ -138,9 +138,7 @@ class FXManager:
         clamped_alpha = max(0.0, min(1.0, lines_alpha))
         self.lines_overlay.color = color.rgba(1, 1, 1, clamped_alpha)
 
-        # Dynamic anime line breathing/jitter at high intensity
+        # Dynamic anime line breathing/rotation
         if clamped_alpha > 0.05:
             self.lines_overlay.rotation_z += dt * (12.0 + steady_fx * 30.0)
-            # Center aperture tightens slightly as you get deeper into danger zones
-            target_scale = 2.3 * (1.0 + (1.0 - steady_fx) * 0.20)
-            self.lines_overlay.scale = target_scale
+            self.lines_overlay.scale = 2.25

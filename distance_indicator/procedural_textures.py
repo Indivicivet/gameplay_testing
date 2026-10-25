@@ -60,40 +60,40 @@ def make_white_rush_variant(img: Image.Image) -> Image.Image:
 
 def generate_in_memory_textures() -> dict:
     """Creates in-memory Ursina Textures for 4 distinct distance tiers (~40-60ms)."""
-    # Tier 1 (Alert: 2.5m - 2.0m): Sparse corner speed marks, wide open aperture
+    # Tier 1 (Alert: 2.5m - 2.0m): Visible corner speed marks framing outer screen
     img_t1_black = create_speed_lines_image(
         line_color=(6, 8, 12, 240),
-        num_lines=110,
-        inner_radius_ratio=0.40,
-        min_width=2.5,
-        max_width=7.0,
+        num_lines=140,
+        inner_radius_ratio=0.28,
+        min_width=3.0,
+        max_width=8.5,
         seed=101,
     )
-    # Tier 2 (Threat: 2.0m - 1.5m): Medium speed lines, moderate aperture
+    # Tier 2 (Threat: 2.0m - 1.5m): Medium speed lines reaching into edges and corners
     img_t2_black = create_speed_lines_image(
         line_color=(6, 8, 12, 248),
-        num_lines=190,
-        inner_radius_ratio=0.32,
+        num_lines=210,
+        inner_radius_ratio=0.22,
         min_width=3.5,
-        max_width=9.5,
+        max_width=10.0,
         seed=202,
     )
-    # Tier 3 (Danger: 1.5m - 1.0m): Dense manga lines, tighter aperture
+    # Tier 3 (Danger: 1.5m - 1.0m): Dense manga lines penetrating towards character center
     img_t3_black = create_speed_lines_image(
         line_color=(6, 8, 12, 255),
-        num_lines=280,
-        inner_radius_ratio=0.24,
+        num_lines=300,
+        inner_radius_ratio=0.16,
         min_width=4.5,
-        max_width=12.0,
+        max_width=12.5,
         seed=303,
     )
-    # Tier 4 (Clinch: < 1.0m): Maximum storm lines, tight focus tunnel
+    # Tier 4 (Clinch: < 1.0m): Full storm lines, tight focus tunnel on combatants
     img_t4_black = create_speed_lines_image(
         line_color=(6, 8, 12, 255),
-        num_lines=390,
-        inner_radius_ratio=0.16,
+        num_lines=400,
+        inner_radius_ratio=0.10,
         min_width=5.5,
-        max_width=14.5,
+        max_width=15.0,
         seed=404,
     )
 
