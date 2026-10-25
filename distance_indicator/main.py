@@ -229,7 +229,7 @@ class DistanceIndicatorGame(Entity):
         )
 
 
-# Global game instance and module-level Ursina hooks
+# Global game instance
 app = Ursina(
     title="Distance Indicator Prototype",
     borderless=False,
@@ -238,17 +238,6 @@ app = Ursina(
 window.color = color.rgb(0.80, 0.82, 0.86)
 
 game = DistanceIndicatorGame()
-
-
-def update():
-    """Top-level module update hook called by Ursina's main loop."""
-    game.update_game(time.dt)
-
-
-def input(key):
-    """Top-level module input hook called by Ursina's input handler."""
-    game.input(key)
-
 
 if __name__ == "__main__":
     app.run()
